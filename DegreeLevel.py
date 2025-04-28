@@ -1,33 +1,30 @@
 """DegreeLevel.py
 
-Reads a single-column Excel of raw degree strings, normalizes them to standard categories,
-and writes out a CSV with original and normalized values.
-Plots the distribution of normalized degrees.
+读取单列Excel学位数据，将数据正则化成标准的学位信息，
+包含：PHD，MD，MASTER，BACHELOR，ASSOCIATE，HIGH_SCHOOL, 没有找到学位（空字符串）
+并将转换结果输出为CSV文件，包含原始学位信息和正则化后的结果
+并将转换后的结果分布画图表示
 
-Usage:
-    DegreeRecognition.py 
-    --python_version 3.12.9
-    --input data.xlsx 
-    --output result.csv 
-    --plot
+-- python_version  3.12.9
+-- input           data.xlsx 
+-- output          result.csv 
+-- plot            distribution.png
 
-Requirements:
-    pandas, matplotlib, openpyxl
+Requirements: pandas, matplotlib, openpyxl
 """
 
 import re
-# import argparse
 import warnings
 import pandas as pd
 from enum import Enum, auto
 import matplotlib.pyplot as plt
 
 
-# suppress openpyxl default-style warning
+# 屏蔽openpyxl的警告
 warnings.filterwarnings('ignore', message='Workbook contains no default style')
 
 class DegreeLevel(Enum):
-    """Standardized education levels, ordered by priority."""
+    """标准化的学位类型，并按优先级排列，使用auto()便于后续添加新类型"""
     
     PHD = auto()
     MD = auto()
@@ -35,14 +32,14 @@ class DegreeLevel(Enum):
     BACHELOR = auto()
     ASSOCIATE = auto()
     HIGH_SCHOOL = auto()
-    NONE = auto()  # no degree found
+    NONE = auto()  # 没有匹配的学历
 
     def __str__(self):
         return '' if self is DegreeLevel.NONE else self.name
     
 
-# descending priority patterns
-_PATTERNS = [
+# 升序排列学位和对应的正则化表达式
+PATTERNS = [
     (DegreeLevel.PHD,        re.compile(r"(ph|doctor|doctorate|dr|d\.|博)", re.I)),
     (DegreeLevel.MD,         re.compile(r"(md|doctor of medicine|physician)", re.I)),
     (DegreeLevel.MASTER,     re.compile(r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)", re.I)),
@@ -53,17 +50,19 @@ _PATTERNS = [
 
 
 def normalize_degree(text: str) -> DegreeLevel:
-    """Return the highest-priority DegreeLevel matching text, or NONE."""
+    """返回最高的学位类型，或者返回NONE类型"""
     
     if not text or not isinstance(text, str):
         return DegreeLevel.NONE
-    for level, pat in _PATTERNS:
+    for level, pat in PATTERNS:
         if pat.search(text):
             return level
     return DegreeLevel.NONE
 
 
-def plot_result(df):
+def plot_result(df, FIGURE_OUTPUT_PATH):
+    """绘制学历分布柱状图"""
+
     counts = df['normalized'].value_counts().sort_index()
     plt.figure()
     counts.plot(kind='bar')
@@ -71,28 +70,31 @@ def plot_result(df):
     plt.xlabel('Degree Level')
     plt.ylabel('Count')
     plt.tight_layout()
-    plt.savefig('distribution.png')
+    plt.savefig(FIGURE_OUTPUT_PATH)
+    plt.show()
 
 
-def main():
-    PATH = "./data.xlsx"
-    OUTPUT_PATH = "result.csv"
+def get_result(PATH, CSV_OUTPUT_PATH, FIGURE_OUTPUT_PATH):
+    # PATH = "./data.xlsx"
+    # OUTPUT_PATH = "result.csv"
 
-    # read single-column Excel as Series
+    # 读取单列Excel文件
     df = pd.read_excel(PATH, header=None, dtype=str)
     df.columns = ['degree']
     df['degree'] = df['degree'].fillna('')
 
-    # normalize
+    # 对学位正则化匹配
     df['normalized'] = df['degree'].apply(lambda x: str(normalize_degree(x)))
 
-    # output CSV
+    # 输出CSV文件
     df[['degree', 'normalized']].to_csv(OUTPUT_PATH, index=False)
     
-    # plot distribution
-    plot_result(df)
-    plt.show()
+    # 绘制学位分布图
+    plot_result(df, FIGURE_OUTPUT_PATH)
 
 
 if __name__ == "__main__":
-    main()
+    PATH = "./data.xlsx"
+    OUTPUT_PATH = "result.csv"
+    FIGURE_OUTPUT_PATH = "distribution.png"
+    get_result(PATH, OUTPUT_PATH, FIGURE_OUTPUT_PATH)
