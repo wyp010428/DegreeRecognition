@@ -36,6 +36,8 @@ degrees = {
     'HIGH_SCHOOL': r"(high school|hs diploma|diploma)",
     'NONE': r"",
 }
+for name in degrees:
+    degrees[name] = re.compile(degrees[name], re.I)
 
 # 根据学位的类型生成 DegreeLevel 类，并绑定 __str__ 方法
 def _degreelevel_str(self):
@@ -54,7 +56,6 @@ def normalize_degree(text: str) -> DegreeLevel:
 
     # text匹配成功返回正则化后的名称
     for level, pat in zip(DegreeLevel, degrees.values()):
-        pat = re.compile(pat, re.I)
         if pat.search(text):
             return level
 
