@@ -19,7 +19,7 @@ Requirements: pandas, matplotlib, openpyxl
 import re
 import warnings
 import pandas as pd
-from enum import StrEnum
+from enum import Enum
 import matplotlib.pyplot as plt
 
 
@@ -27,17 +27,31 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore', message='Workbook contains no default style')
 
 # 初始化标准化学位数据和正则表达式匹配表
-class DegreeLevel(StrEnum):
-    PHD = r"(ph|doctor|doctorate|dr|d\.|博)"
-    MD = r"(md|doctor of medicine|physician)"
-    MASTER = r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)"
-    BACHELOR = r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)"
-    ASSOCIATE = r"(associate(s)?)\b"
-    HIGH_SCHOOL = r"(high school|hs diploma|diploma)"
-    NONE = r"¥"
+degrees_dict = {
+    "PHD": r"(ph|doctor|doctorate|dr|d\.|博)",
+    "MD": r"(md|doctor of medicine|physician)",
+    "MASTER": r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)",
+    "BACHELOR": r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)",
+    "ASSOCIATE": r"(associate(s)?)\b",
+    "HIGH_SCHOOL": r"(high school|hs diploma|diploma)",
+    "NONE": r"¥",
+}
+for d in degrees_dict:
+    degrees_dict[d] = re.compile(degrees_dict[d], re.I)
+# print(degrees_dict)
 
+# class DegreeLevel(StrEnum):
+#     PHD = r"(ph|doctor|doctorate|dr|d\.|博)"
+#     MD = r"(md|doctor of medicine|physician)"
+#     MASTER = r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)"
+#     BACHELOR = r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)"
+#     ASSOCIATE = r"(associate(s)?)\b"
+#     HIGH_SCHOOL = r"(high school|hs diploma|diploma)"
+#     NONE = r"¥"
 
-def normalize_degree(text: str) -> DegreeLevel:
+DegreeLevel = Enum("DegreeLevel", degrees_dict)
+
+def normalize_degree(text: str) -> str:
     """返回最高的学位类型，或者返回 DegreeLevel.NONE 类型"""
 
     # text不合法时返回空字符串
@@ -46,7 +60,7 @@ def normalize_degree(text: str) -> DegreeLevel:
 
     # text匹配成功返回正则化后的名称
     for member in DegreeLevel:
-        pat = re.compile(member.value, re.I)
+        pat = member.value
         if pat.search(text):
             return member.name
 
