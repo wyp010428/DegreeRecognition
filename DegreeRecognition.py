@@ -1,16 +1,19 @@
-"""DegreeLevel.py
+"""DegreeRecognition.py
 
 读取单列Excel学位数据，将数据正则化成标准的学位信息，
 包含：PHD，MD，MASTER，BACHELOR，ASSOCIATE，HIGH_SCHOOL, 没有找到学位（空字符串）
 并将转换结果输出为CSV文件，包含原始学位信息和正则化后的结果
 并将转换后的结果分布画图表示
 
+Example:
+    Bachelor's degree -> BACHELOR
+
+Requirements: pandas, matplotlib, openpyxl
+
 -- python_version  3.12.9
 -- input           data.xlsx 
 -- output          result.csv 
 -- plot            distribution.png
-
-Requirements: pandas, matplotlib, openpyxl
 """
 
 import re
@@ -36,7 +39,6 @@ class DegreeLevel(Enum):
 
     def __str__(self):
         return '' if self is DegreeLevel.NONE else self.name
-    
 
 # 升序排列学位和对应的正则化表达式
 PATTERNS = [
@@ -65,6 +67,7 @@ def plot_result(df, FIGURE_OUTPUT_PATH):
 
     counts = df['normalized'].value_counts().sort_index()
     plt.figure()
+    counts.index = counts.index.map(lambda x: 'NO MATCH' if x == '' else x)
     counts.plot(kind='bar')
     plt.title('Degree Distribution')
     plt.xlabel('Degree Level')
@@ -75,8 +78,7 @@ def plot_result(df, FIGURE_OUTPUT_PATH):
 
 
 def get_result(PATH, CSV_OUTPUT_PATH, FIGURE_OUTPUT_PATH):
-    # PATH = "./data.xlsx"
-    # OUTPUT_PATH = "result.csv"
+    """接受待处理文件路径和输出路径，输出正则化后的CSV文件到指定路径，并绘制图像到指定路径"""
 
     # 读取单列Excel文件
     df = pd.read_excel(PATH, header=None, dtype=str)
@@ -87,7 +89,7 @@ def get_result(PATH, CSV_OUTPUT_PATH, FIGURE_OUTPUT_PATH):
     df['normalized'] = df['degree'].apply(lambda x: str(normalize_degree(x)))
 
     # 输出CSV文件
-    df[['degree', 'normalized']].to_csv(OUTPUT_PATH, index=False)
+    df[['degree', 'normalized']].to_csv(CSV_OUTPUT_PATH, index=False)
     
     # 绘制学位分布图
     plot_result(df, FIGURE_OUTPUT_PATH)

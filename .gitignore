@@ -5,3 +5,6 @@ distribution.png
 result.csv
 ~$data.xlsx
 .gitignore
+.DS_Store
+__pycache__/
+test.py
