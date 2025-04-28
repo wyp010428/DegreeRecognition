@@ -28,13 +28,13 @@ warnings.filterwarnings('ignore', message='Workbook contains no default style')
 
 # 所有标准化的学位名称及其正则表达式
 degrees = {
-    'PHD': re.compile(r"(ph|doctor|doctorate|dr|d\.|博)", re.I),
-    'MD': re.compile(r"(md|doctor of medicine|physician)", re.I),
-    'MASTER': re.compile(r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)", re.I),
-    'BACHELOR': re.compile(r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)", re.I),
-    'ASSOCIATE': re.compile(r"(associate(s)?)\b", re.I),
-    'HIGH_SCHOOL': re.compile(r"(high school|hs diploma|diploma)", re.I),
-    'NONE': re.compile(""),
+    'PHD': r"(ph|doctor|doctorate|dr|d\.|博)",
+    'MD': r"(md|doctor of medicine|physician)",
+    'MASTER': r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)",
+    'BACHELOR': r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)",
+    'ASSOCIATE': r"(associate(s)?)\b",
+    'HIGH_SCHOOL': r"(high school|hs diploma|diploma)",
+    'NONE': r"",
 }
 
 # 根据学位的类型生成 DegreeLevel 类，并绑定 __str__ 方法
@@ -54,6 +54,7 @@ def normalize_degree(text: str) -> DegreeLevel:
 
     # text匹配成功返回正则化后的名称
     for level, pat in zip(DegreeLevel, degrees.values()):
+        pat = re.compile(pat, re.I)
         if pat.search(text):
             return level
 
