@@ -27,32 +27,35 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore', message='Workbook contains no default style')
 
 # 初始化标准化学位数据和正则表达式匹配表
-degrees_dict = {
-    "PHD": r"(ph|doctor|doctorate|dr|d\.|博)",
-    "MD": r"(md|doctor of medicine|physician)",
-    "MASTER": r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)",
-    "BACHELOR": r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)",
-    "ASSOCIATE": r"(associate(s)?)\b",
-    "HIGH_SCHOOL": r"(high school|hs diploma|diploma)",
-    "NONE": r"¥",
-}
-for d in degrees_dict:
-    degrees_dict[d] = re.compile(degrees_dict[d], re.I)
-# print(degrees_dict)
+# degrees_dict = {
+#     "PHD": r"(ph|doctor|doctorate|dr|d\.|博)",
+#     "MD": r"(md|doctor of medicine|physician)",
+#     "MASTER": r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)",
+#     "BACHELOR": r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)",
+#     "ASSOCIATE": r"(associate(s)?)\b",
+#     "HIGH_SCHOOL": r"(high school|hs diploma|diploma)",
+#     "NONE": r"¥",
+# }
+# for d in degrees_dict:
+#     degrees_dict[d] = re.compile(degrees_dict[d], re.I)
 
-# class DegreeLevel(StrEnum):
-#     PHD = r"(ph|doctor|doctorate|dr|d\.|博)"
-#     MD = r"(md|doctor of medicine|physician)"
-#     MASTER = r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)"
-#     BACHELOR = r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)"
-#     ASSOCIATE = r"(associate(s)?)\b"
-#     HIGH_SCHOOL = r"(high school|hs diploma|diploma)"
-#     NONE = r"¥"
+# DegreeLevel = Enum("DegreeLevel", degrees_dict)
 
-DegreeLevel = Enum("DegreeLevel", degrees_dict)
+class DegreeLevel(Enum):
+    PHD = r"(ph|doctor|doctorate|dr|d\.|博)"
+    MD = r"(md|doctor of medicine|physician)"
+    MASTER = r"(master(s)?|ms(c)?|m\.s|mba|m\.|m|硕|碩)"
+    BACHELOR = r"(bachelor(s)?|ba|bs(c)?|b\.a|b\.s|b\.|b|degree|学士|本科)"
+    ASSOCIATE = r"(associate(s)?)\b"
+    HIGH_SCHOOL = r"(high school|hs diploma|diploma)"
+    NONE = r"¥"
+
+    def __init__(self, value):
+        self.v = value
+        self.regex = re.compile(value, re.I)
 
 def normalize_degree(text: str) -> str:
-    """返回最高的学位类型，或者返回 DegreeLevel.NONE 类型"""
+    """返回最高的学位类型，匹配失败返回空字符串"""
 
     # text不合法时返回空字符串
     if not text or not isinstance(text, str):
@@ -60,8 +63,8 @@ def normalize_degree(text: str) -> str:
 
     # text匹配成功返回正则化后的名称
     for member in DegreeLevel:
-        pat = member.value
-        if pat.search(text):
+        # pat = member.value
+        if member.regex.search(text):
             return member.name
 
     # 无匹配则返回空字符串
