@@ -51,8 +51,7 @@ get_result(PATH, CSV_OUTPUT_PATH, FIGURE_OUTPUT_PATH)
 ## 代码结构
 
 - **`DegreeRecognition.py`**：主脚本文件。
-  - **`degrees` 字典**：标准化的学位名称和对应的正则表达式键值对。
-  - **`DegreeLevel` 枚举**：定义标准化后的学位类别。
+  - **`DegreeLevel` 枚举**：标准化的学位名称和对应的正则表达式键值对。
   - **`normalize_degree(text)`**：匹配并返回最高优先级的学位类型。
   - **`plot_result(df, FIGURE_OUTPUT_PATH)`**：绘制并保存学位分布图。
   - **`get_result(PATH, CSV_OUTPUT_PATH, FIGURE_OUTPUT_PATH)`**：执行文件读取、正则化处理、CSV 输出和绘图。
